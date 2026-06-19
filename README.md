@@ -31,3 +31,14 @@ source .venv/bin/activate
 jupytext --to notebook mixture_playpen.py
 jupyter notebook mixture_playpen.ipynb
 ```
+
+### With pip instead of uv
+
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python -m ipykernel install --user --name mixture_playpen --display-name "mixture_playpen"
+jupytext --to notebook mixture_playpen.py
+jupyter notebook mixture_playpen.ipynb
+```
