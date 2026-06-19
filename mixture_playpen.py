@@ -183,16 +183,30 @@ DRAWS  = 1000
 CHAINS = 4
 
 # Community structure
-TAXA_PER_COMMUNITY = 30
-N_SOURCE_SAMPLES   = 3    # pooled source replicates (what the model sees)
-LIBRARY_SIZE       = 10_000
-ALPHA              = 0.3  # Dirichlet concentration: <1 sparse/uneven, >1 even
+TAXA_PER_COMMUNITY = 30          # int or list[int] for per-community sizes e.g. [5, 20, 10]
+N_SOURCE_SAMPLES   = 3           # pooled source replicates (what the model sees)
+LIBRARY_SIZE       = 10_000      # total counts per sample (multinomial depth)
+ALPHA              = 0.3         # Dirichlet concentration: <1 sparse/uneven, >1 even
 
 # Overlap between source communities
-# overlap_mode: 'chain' (adjacent share taxa), 'core' (all share), 'both'
+# overlap_mode: 'chain' (adjacent communities share taxa)
+#               'core'  (all communities share a common block of taxa)
+#               'both'  (core shared by all + chain overlap among unique portions)
 OVERLAP_MODE = 'core'
-OVERLAP      = 0.0
-CORE_OVERLAP = 3   # taxa shared by ALL communities (set 0 for fully disjoint)
+OVERLAP      = 0.0               # fraction of taxa shared between adjacent communities (chain/both)
+CORE_OVERLAP = 3                 # taxa shared by ALL communities (int count, or float fraction)
+
+# Group structure — set to None to disable
+# e.g. [[0, 1], [2, 3]] makes communities 0&1 share one taxon pool, 2&3 another
+GROUPS             = None
+GROUP_CORE_OVERLAP = 0           # taxa shared within each group (same semantics as CORE_OVERLAP)
+
+# Core signature strength — how distinctly each community dominates a slice of the core taxa
+# 1.0 = uniform (no signature); >1 gives each community elevated abundance on ~1/K of core taxa
+CORE_SIGNATURE_STRENGTH = 1.0
+CORE_WEIGHT             = None   # fraction of abundance on core taxa; None = n_core/taxa_per_community
+
+SHUFFLE_TAXA = False             # randomly permute taxon column order
 
 # derived
 true_weights = np.array(WEIGHTS, dtype=float)
@@ -214,8 +228,10 @@ _preview = make_communities(
     n_communities=n_sources,
     taxa_per_community=TAXA_PER_COMMUNITY,
     overlap=OVERLAP, overlap_mode=OVERLAP_MODE, core_overlap=CORE_OVERLAP,
+    groups=GROUPS, group_core_overlap=GROUP_CORE_OVERLAP,
+    core_signature_strength=CORE_SIGNATURE_STRENGTH, core_weight=CORE_WEIGHT,
     alpha=ALPHA, n_samples=N_SOURCE_SAMPLES,
-    library_size=LIBRARY_SIZE, seed=SEED,
+    library_size=LIBRARY_SIZE, shuffle_taxa=SHUFFLE_TAXA, seed=SEED,
 )
 
 fig, ax = plt.subplots(figsize=(12, 3))
