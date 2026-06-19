@@ -20,7 +20,11 @@ uv venv .venv --python 3.11
 echo "Installing dependencies ..."
 uv pip install --python .venv/bin/python -r requirements.txt
 
+echo "Registering Jupyter kernel ..."
+.venv/bin/python -m ipykernel install --user --name mixture_playpen --display-name "mixture_playpen"
+
 echo ""
 echo "Done. Activate with:  source .venv/bin/activate"
-echo "Then run:             jupyter notebook mixture_playpen.ipynb"
-echo "Or convert first:     jupytext --to notebook mixture_playpen.py"
+echo "Then run:             jupytext --to notebook mixture_playpen.py"
+echo "                      jupyter notebook mixture_playpen.ipynb"
+echo "Select kernel:        Kernel → Change kernel → mixture_playpen"
