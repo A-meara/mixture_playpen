@@ -13,7 +13,7 @@ Set mixture weights and community structure in the CONFIG cell, run all, and ins
 
 ## Setup
 
-Requires [uv](https://github.com/astral-sh/uv) and the `graphviz` system binary:
+Requires [uv](https://github.com/astral-sh/uv) (install with `curl -LsSf https://astral.sh/uv/install.sh | sh`) and the `graphviz` system binary:
 
 ```bash
 # macOS
