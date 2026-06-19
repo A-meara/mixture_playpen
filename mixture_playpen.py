@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# # Mixture Source-Tracking — Playpen
+# # Mixture Source-Tracking Playpen
 #
 # Shows what mock source communities look like, and what the sink looks like
 # after mixing them at a chosen weight. Tweak the CONFIG cell and re-run all.
@@ -28,7 +28,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import pytensor
-pytensor.config.cxx = ""
+pytensor.config.cxx = "" # for mac users, delete / comment out if linux 
 import pymc as pm
 import arviz as az
 import graphviz
@@ -43,42 +43,6 @@ except ImportError:
     HAS_NUTPIE = False
 
 COMM_COLORS = list(plt.cm.Set2.colors)
-
-# %% [markdown]
-# ## Config
-
-# %%
-# True mixture weights per source — must sum to 1 (renormalised automatically).
-# Length determines number of sources.
-WEIGHTS      = [0.71, 0.21, 0.08]
-SEED         = 42
-
-# MCMC settings
-TUNE   = 1000
-DRAWS  = 1000
-CHAINS = 4
-
-# Community structure
-TAXA_PER_COMMUNITY = 30
-N_SOURCE_SAMPLES   = 3    # pooled source replicates (what the model sees)
-LIBRARY_SIZE       = 10_000
-ALPHA              = 0.3  # Dirichlet concentration: <1 sparse/uneven, >1 even
-
-# Overlap between source communities
-# overlap_mode: 'chain' (adjacent share taxa), 'core' (all share), 'both'
-OVERLAP_MODE = 'core'
-OVERLAP      = 0.0
-CORE_OVERLAP = 3   # taxa shared by ALL communities (set 0 for fully disjoint)
-
-# derived
-true_weights = np.array(WEIGHTS, dtype=float)
-true_weights /= true_weights.sum()
-n_sources = len(true_weights)
-
-print(f'n_sources = {n_sources}')
-for i, w in enumerate(true_weights):
-    print(f'  w_source_{i} = {w:.3f}')
-print(f'TAXA_PER_COMMUNITY={TAXA_PER_COMMUNITY}  ALPHA={ALPHA}  SEED={SEED}')
 
 # %% [markdown]
 # ## Core functions
@@ -203,6 +167,42 @@ def check_recovery_bayes(idata, ground_truth, n_sources, hdi_prob=0.94):
         width=hi - lo,
     )
     return results
+
+# %% [markdown]
+# ## Config
+
+# %%
+# True mixture weights per source — must sum to 1 (renormalised automatically).
+# Length determines number of sources.
+WEIGHTS      = [0.71, 0.21, 0.08]
+SEED         = 42
+
+# MCMC settings
+TUNE   = 1000
+DRAWS  = 1000
+CHAINS = 4
+
+# Community structure
+TAXA_PER_COMMUNITY = 30
+N_SOURCE_SAMPLES   = 3    # pooled source replicates (what the model sees)
+LIBRARY_SIZE       = 10_000
+ALPHA              = 0.3  # Dirichlet concentration: <1 sparse/uneven, >1 even
+
+# Overlap between source communities
+# overlap_mode: 'chain' (adjacent share taxa), 'core' (all share), 'both'
+OVERLAP_MODE = 'core'
+OVERLAP      = 0.0
+CORE_OVERLAP = 3   # taxa shared by ALL communities (set 0 for fully disjoint)
+
+# derived
+true_weights = np.array(WEIGHTS, dtype=float)
+true_weights /= true_weights.sum()
+n_sources = len(true_weights)
+
+print(f'n_sources = {n_sources}')
+for i, w in enumerate(true_weights):
+    print(f'  w_source_{i} = {w:.3f}')
+print(f'TAXA_PER_COMMUNITY={TAXA_PER_COMMUNITY}  ALPHA={ALPHA}  SEED={SEED}')
 
 # %% [markdown]
 # ## Source community structure preview
@@ -336,25 +336,6 @@ ax.set_ylabel('Relative abundance')
 ax.set_xlabel(f'Top {top_n} taxa (by predicted abundance)')
 ax.set_title('Stacked source contributions vs observed sink  (dots = observed)')
 ax.legend(fontsize=9, loc='upper right')
-plt.tight_layout()
-plt.show()
-
-# %% [markdown]
-# ## Mixing weights summary
-
-# %%
-fig, ax = plt.subplots(figsize=(4, 3))
-labels = [f'Source {i}' for i in range(n_sources)] + ['Unknown']
-sizes  = [gt[f'w_source_{i}'] for i in range(n_sources)] + [gt['w_unknown']]
-colors_pie = [COMM_COLORS[i % len(COMM_COLORS)] for i in range(n_sources)] + ['lightgray']
-wedges, texts, autotexts = ax.pie(
-    sizes, labels=labels, colors=colors_pie,
-    autopct=lambda p: f'{p:.1f}%' if p > 1 else '',
-    startangle=90, pctdistance=0.7,
-)
-for t in autotexts:
-    t.set_fontsize(9)
-ax.set_title('True mixing weights', fontsize=11)
 plt.tight_layout()
 plt.show()
 
