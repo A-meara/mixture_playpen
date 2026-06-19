@@ -355,54 +355,6 @@ model = build_bayesian_model(source_pooled, sink_counts, feature_names, n_source
 # %%
 pm.model_to_graphviz(model)
 
-# %% [markdown]
-# ### Plate diagram — symbolic (for paper)
-#
-# Same model structure, but coord names are single letters so the plates are
-# labelled **F** (features), **K** (sources), **K+1** (sources + unknown).
-
-# %%
-def make_plate_diagram_symbolic(save_path="mixture_model_plate_symbolic"):
-    """
-    Hand-built plate diagram with symbolic labels (F, K, K+1).
-    K+1/W plate is forced to the left via rank=same + invisible ordering edge.
-    All plate labels bottom-right (labeljust=r labelloc=b).
-    """
-    dot = """\
-digraph {
-\tcompound=true
-\tsubgraph "clusterK+1" {
-\t\tlabel="K+1" labeljust=r labelloc=b style=rounded
-\t\tW [label="W\\n~\\nDirichlet" shape=ellipse]
-\t}
-\tsubgraph "clusterKxF" {
-\t\tlabel="K \\u00D7 F" labeljust=r labelloc=b style=rounded
-\t\tsource_logits [label="source_logits\\n~\\nZeroSumNormal" shape=ellipse]
-\t\tp_sources [label="p_sources\\n~\\nDeterministic" shape=box]
-\t\tfit_sources [label="fit_sources\\n~\\nMultinomial" shape=ellipse style=filled]
-\t}
-\tsubgraph "clusterF" {
-\t\tlabel="F" labeljust=r labelloc=b style=rounded
-\t\tunknown_logits [label="unknown_logits\\n~\\nZeroSumNormal" shape=ellipse]
-\t\tp_sink [label="p_sink\\n~\\nDeterministic" shape=box]
-\t\tfit_sink [label="fit_sink\\n~\\nMultinomial" shape=ellipse style=filled]
-\t}
-\tW -> p_sink
-\tsource_logits -> p_sources
-\tp_sources -> fit_sources
-\tp_sources -> p_sink
-\tunknown_logits -> p_sink
-\tp_sink -> fit_sink
-\t{ rank=same; W; source_logits }
-\tW -> source_logits [style=invis]
-}
-"""
-    gv = graphviz.Source(dot)
-    gv.render(save_path, format="pdf", cleanup=True)
-    return gv
-
-gv_sym = make_plate_diagram_symbolic()
-gv_sym
 
 # %%
 idata = fit_bayesian(model, tune=TUNE, draws=DRAWS, chains=CHAINS)
