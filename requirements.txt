@@ -1,0 +1,11 @@
+pymc==5.24.1
+pytensor==2.31.6
+arviz==0.22.0
+nutpie==0.15.2
+numpy
+pandas
+matplotlib
+scipy
+jupytext
+jupyter
+graphviz
